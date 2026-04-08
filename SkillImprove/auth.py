@@ -1,38 +1,40 @@
 import json
 import os
 
-# ---------- PATH SETUP ---------- #
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 USER_DB = os.path.join(DATA_DIR, "users.json")
 
-# ---------- CREATE FOLDER ---------- #
+# Create folder if not exists
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# ---------- CREATE FILE IF NOT EXISTS ---------- #
+# Create file if not exists
 if not os.path.exists(USER_DB):
     with open(USER_DB, "w") as f:
         json.dump({}, f)
 
-# ---------- LOAD USERS ---------- #
+# Load users safely
 def load_users():
     try:
         with open(USER_DB, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            if not isinstance(data, dict):
+                return {}
+            return data
     except:
         return {}
 
-# ---------- SAVE USERS ---------- #
+# Save users safely
 def save_users(users):
     try:
         with open(USER_DB, "w") as f:
             json.dump(users, f, indent=4)
     except:
-        pass  # prevents crash
+        pass
 
-# ---------- SIGNUP FUNCTION ---------- #
+# Signup function
 def signup(name, email, phone, password):
-    users = load_users()
+    users = load_users()  # always returns dict
 
     if email in users:
         return False, "User already exists"
@@ -46,7 +48,7 @@ def signup(name, email, phone, password):
     save_users(users)
     return True, "Signup successful"
 
-# ---------- LOGIN FUNCTION ---------- #
+# Login function
 def login(email, password):
     users = load_users()
 
