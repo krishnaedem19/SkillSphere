@@ -43,7 +43,7 @@ dashboard_img = os.path.join(BASE_DIR, "assets", "dashboard_bg.jpg")
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
-# ---------- LOGIN PAGE ---------- #
+# ---------- LOGIN / SIGNUP PAGE ---------- #
 if not st.session_state.logged_in:
 
     if os.path.exists(login_img):
@@ -52,7 +52,6 @@ if not st.session_state.logged_in:
         set_bg_url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f")
 
     st.title("SkillImprove")
-
     option = st.selectbox("Choose", ["Login", "Signup"])
 
     # SIGNUP
@@ -92,7 +91,6 @@ else:
         set_bg_url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d")
 
     user = st.session_state.user
-
     st.title(f"Welcome {user['name']}")
 
     if st.button("Logout"):
