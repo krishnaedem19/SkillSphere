@@ -4,19 +4,33 @@ from career_engine import analyze_skills
 import base64
 import os
 
-# ---------- SAFE BACKGROUND FUNCTION ---------- #
+# ---------- SAFE BACKGROUND FUNCTION (NO ERROR) ---------- #
 def set_bg(image):
-    if not os.path.exists(image):
-        st.warning(f"Image not found: {image}")
-        return
+    try:
+        if not os.path.exists(image):
+            return  # skip if image not found
 
-    with open(image, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
+        with open(image, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode()
 
+        st.markdown(f"""
+        <style>
+        .stApp {{
+            background-image: url("data:image/jpg;base64,{encoded}");
+            background-size: cover;
+        }}
+        </style>
+        """, unsafe_allow_html=True)
+
+    except Exception:
+        pass  # never crash
+
+# ---------- OPTIONAL ONLINE BACKGROUND ---------- #
+def set_bg_url(url):
     st.markdown(f"""
     <style>
     .stApp {{
-        background-image: url("data:image/jpg;base64,{encoded}");
+        background-image: url("{url}");
         background-size: cover;
     }}
     </style>
@@ -35,7 +49,11 @@ if "logged_in" not in st.session_state:
 # ---------- LOGIN / SIGNUP PAGE ---------- #
 if not st.session_state.logged_in:
 
-    set_bg(login_img)
+    # Try local image, if not available use online
+    if os.path.exists(login_img):
+        set_bg(login_img)
+    else:
+        set_bg_url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f")
 
     st.title("SkillImprove")
 
@@ -72,7 +90,11 @@ if not st.session_state.logged_in:
 # ---------- DASHBOARD ---------- #
 else:
 
-    set_bg(dashboard_img)
+    # Try local image, else online
+    if os.path.exists(dashboard_img):
+        set_bg(dashboard_img)
+    else:
+        set_bg_url("https://images.unsplash.com/photo-1504384308090-c894fdcc538d")
 
     user = st.session_state.user
 
