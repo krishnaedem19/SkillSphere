@@ -1,58 +1,54 @@
-import json
+import sqlite3
 import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(BASE_DIR, "data")
-USER_DB = os.path.join(DATA_DIR, "users.json")
+DB_PATH = os.path.join(BASE_DIR, "users.db")
 
-# Create folder if not exists
-os.makedirs(DATA_DIR, exist_ok=True)
+# Create DB and table
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-# Create file if not exists
-if not os.path.exists(USER_DB):
-    with open(USER_DB, "w") as f:
-        json.dump({}, f)
+    c.execute("""
+    CREATE TABLE IF NOT EXISTS users (
+        email TEXT PRIMARY KEY,
+        name TEXT,
+        phone TEXT,
+        password TEXT
+    )
+    """)
 
-# Load users safely
-def load_users():
-    try:
-        with open(USER_DB, "r") as f:
-            data = json.load(f)
-            if not isinstance(data, dict):
-                return {}
-            return data
-    except:
-        return {}
+    conn.commit()
+    conn.close()
 
-# Save users safely
-def save_users(users):
-    try:
-        with open(USER_DB, "w") as f:
-            json.dump(users, f, indent=4)
-    except:
-        pass
+init_db()
 
-# Signup function
+# Signup
 def signup(name, email, phone, password):
-    users = load_users()  # always returns dict
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-    if email in users:
+    try:
+        c.execute("INSERT INTO users VALUES (?, ?, ?, ?)",
+                  (email, name, phone, password))
+        conn.commit()
+        return True, "Signup successful"
+    except:
         return False, "User already exists"
+    finally:
+        conn.close()
 
-    users[email] = {
-        "name": name,
-        "phone": phone,
-        "password": password
-    }
-
-    save_users(users)
-    return True, "Signup successful"
-
-# Login function
+# Login
 def login(email, password):
-    users = load_users()
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
 
-    if email in users and users[email]["password"] == password:
-        return True, users[email]
+    c.execute("SELECT name, phone FROM users WHERE email=? AND password=?",
+              (email, password))
 
+    user = c.fetchone()
+    conn.close()
+
+    if user:
+        return True, {"name": user[0], "phone": user[1]}
     return False, None
