@@ -51,7 +51,7 @@ if not st.session_state.logged_in:
     else:
         set_bg_url("https://images.unsplash.com/photo-1522202176988-66273c2fd55f")
 
-    st.title("SkillImprove")
+    st.title("SkillShere")
     option = st.selectbox("Choose", ["Login", "Signup"])
 
     # SIGNUP
